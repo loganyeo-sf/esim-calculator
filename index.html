@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>베트남 eSIM 구매 일수 계산기</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --red: #DA251D;
+    --yellow: #F5C518;
+    --dark: #1a1a1a;
+    --mid: #444;
+    --light: #f7f7f5;
+    --border: #e0ddd8;
+    --card: #ffffff;
+    --accent-bg: #fff8f8;
+    --tag: #ffeaea;
+  }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--light);
+    color: var(--dark);
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 32px 16px 48px;
+  }
+
+  .card {
+    background: var(--card);
+    border-radius: 16px;
+    box-shadow: 0 2px 24px rgba(0,0,0,0.07);
+    width: 100%;
+    max-width: 560px;
+    overflow: hidden;
+  }
+
+  .header {
+    background: var(--red);
+    padding: 28px 32px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::after {
+    content: '★';
+    position: absolute;
+    right: 28px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--yellow);
+    font-size: 64px;
+    opacity: 0.18;
+    pointer-events: none;
+  }
+  .header h1 {
+    color: #fff;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.35;
+    letter-spacing: -0.3px;
+  }
+  .header p {
+    color: rgba(255,255,255,0.8);
+    font-size: 13px;
+    margin-top: 4px;
+  }
+
+  .body {
+    padding: 28px 32px;
+  }
+
+  .field-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--mid);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+  .field label span.sub {
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    color: #999;
+    font-size: 11px;
+    margin-left: 4px;
+  }
+
+  input[type="datetime-local"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 14px;
+    color: var(--dark);
+    background: #fff;
+    transition: border-color 0.15s;
+    outline: none;
+  }
+  input[type="datetime-local"]:focus {
+    border-color: var(--red);
+  }
+
+  .notice-box {
+    background: var(--accent-bg);
+    border: 1px solid #ffd6d6;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 12.5px;
+    color: #c0392b;
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+  .notice-box b { font-weight: 600; }
+
+  .btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--red);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    letter-spacing: -0.2px;
+  }
+  .btn:hover { background: #b71c1c; }
+  .btn:active { transform: scale(0.98); }
+
+  .result {
+    margin-top: 24px;
+    border-top: 1.5px solid var(--border);
+    padding-top: 22px;
+    display: none;
+  }
+  .result.visible { display: block; }
+
+  .result-summary {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 18px;
+  }
+  .big-days {
+    font-size: 52px;
+    font-weight: 700;
+    color: var(--red);
+    line-height: 1;
+    min-width: 80px;
+    text-align: center;
+  }
+  .big-days span {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--mid);
+    text-align: center;
+    margin-top: 2px;
+  }
+  .result-detail {
+    flex: 1;
+    font-size: 13.5px;
+    color: var(--mid);
+    line-height: 1.7;
+  }
+  .result-detail b { color: var(--dark); font-weight: 600; }
+
+  .product-label {
+    background: var(--tag);
+    border: 1px solid #ffcdd2;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 14px;
+    margin-bottom: 16px;
+  }
+  .product-label .pl-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+  .product-label .pl-name {
+    font-weight: 700;
+    color: var(--red);
+    font-size: 16px;
+  }
+  .product-label .pl-sub {
+    font-size: 12px;
+    color: var(--mid);
+    margin-top: 2px;
+  }
+
+  .breakdown {
+    background: var(--light);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 12.5px;
+    color: var(--mid);
+    line-height: 1.8;
+  }
+  .breakdown .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 3px 0;
+  }
+  .breakdown .row + .row { border-top: 1px solid var(--border); }
+  .breakdown .row b { color: var(--dark); }
+  .breakdown .free-tag {
+    background: #e8f5e9;
+    color: #2e7d32;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 1px 7px;
+    border-radius: 20px;
+  }
+  .breakdown .paid-tag {
+    background: #e3f2fd;
+    color: #1565c0;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 1px 7px;
+    border-radius: 20px;
+  }
+
+  .esim-tip {
+    margin-top: 14px;
+    font-size: 12px;
+    color: #888;
+    background: #f9f9f7;
+    border-radius: 8px;
+    padding: 10px 12px;
+    line-height: 1.6;
+    border-left: 3px solid var(--yellow);
+  }
+  .esim-tip b { color: var(--dark); }
+
+  .error-msg {
+    margin-top: 14px;
+    color: #c0392b;
+    font-size: 13px;
+    text-align: center;
+    display: none;
+  }
+  .error-msg.visible { display: block; }
+
+  @media (max-width: 480px) {
+    .body { padding: 22px 20px; }
+    .header { padding: 22px 20px 18px; }
+    .field-group { grid-template-columns: 1fr; }
+    .big-days { font-size: 44px; min-width: 60px; }
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <h1>🇻🇳 베트남 로컬망 완전무제한 eSIM<br>구매 일수 계산기</h1>
+    <p>입국·출국 일시를 입력하면 필요한 일수를 바로 알려드려요</p>
+  </div>
+  <div class="body">
+    <div class="notice-box">
+      <b>📌 이 상품의 하루 기준</b><br>
+      베트남 현지 시간 <b>자정(00:00)</b> 기준 리셋 &nbsp;·&nbsp; <b>도착 당일은 무료</b> 제공
+    </div>
+
+    <div class="field-group">
+      <div class="field">
+        <label>베트남 입국 일시 <span class="sub">(현지시간)</span></label>
+        <input type="datetime-local" id="arrivalInput">
+      </div>
+      <div class="field">
+        <label>베트남 출국 일시 <span class="sub">(현지시간)</span></label>
+        <input type="datetime-local" id="departureInput">
+      </div>
+    </div>
+
+    <button class="btn" onclick="calculate()">구매 일수 계산하기</button>
+
+    <div class="error-msg" id="errorMsg">출국 일시는 입국 일시보다 나중이어야 합니다.</div>
+
+    <div class="result" id="result">
+      <div class="product-label">
+        <div class="pl-title">추천 상품</div>
+        <div class="pl-name" id="productName">—</div>
+        <div class="pl-sub" id="productSub">—</div>
+      </div>
+
+      <div class="result-summary">
+        <div class="big-days" id="bigDays">0<span>일 구매</span></div>
+        <div class="result-detail" id="resultDetail">—</div>
+      </div>
+
+      <div class="breakdown" id="breakdown"></div>
+
+      <div class="esim-tip" id="esimTip"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Available products: days of purchase (paid days, not counting free arrival day)
+  const PRODUCTS = [1, 3, 4, 5, 6, 7, 10, 15, 30];
+
+  function calculate() {
+    const arrivalVal = document.getElementById('arrivalInput').value;
+    const departureVal = document.getElementById('departureInput').value;
+    const errorMsg = document.getElementById('errorMsg');
+    const resultEl = document.getElementById('result');
+
+    errorMsg.classList.remove('visible');
+    resultEl.classList.remove('visible');
+
+    if (!arrivalVal || !departureVal) {
+      errorMsg.textContent = '입국 및 출국 일시를 모두 입력해 주세요.';
+      errorMsg.classList.add('visible');
+      return;
+    }
+
+    const arrival = new Date(arrivalVal);
+    const departure = new Date(departureVal);
+
+    if (departure <= arrival) {
+      errorMsg.textContent = '출국 일시는 입국 일시보다 나중이어야 합니다.';
+      errorMsg.classList.add('visible');
+      return;
+    }
+
+    // Arrival date (free day)
+    const arrivalDate = toDateOnly(arrival);
+    // Day after arrival = first paid day
+    const firstPaidDate = addDays(arrivalDate, 1);
+
+    // Departure date
+    const departureDate = toDateOnly(departure);
+
+    // If departure is exactly midnight (00:00), last used day is previous day
+    // Otherwise, last used day is the departure date itself
+    let lastUsedDate;
+    if (departure.getHours() === 0 && departure.getMinutes() === 0) {
+      lastUsedDate = addDays(departureDate, -1);
+    } else {
+      lastUsedDate = departureDate;
+    }
+
+    // Paid days = from firstPaidDate to lastUsedDate inclusive
+    const paidDays = Math.max(0, dayDiff(firstPaidDate, lastUsedDate) + 1);
+
+    // Edge: if departure is same day as arrival (or before), paidDays = 0 → recommend 1-day for safety? 
+    // But if traveller is only there on arrival day, they still get free usage that day
+    // We still show 0 paid days but recommend the free-day product.
+
+    // Find best matching product
+    const recommended = PRODUCTS.find(p => p >= paidDays) || PRODUCTS[PRODUCTS.length - 1];
+
+    // Render
+    document.getElementById('bigDays').innerHTML = `${recommended}<span>일 구매</span>`;
+
+    const productNameEl = document.getElementById('productName');
+    const productSubEl = document.getElementById('productSub');
+    productNameEl.textContent = `${recommended}일 (도착당일무료 ${recommended + 1}일사용)`;
+    productSubEl.textContent = paidDays === 0
+      ? '도착 당일 하루만 이용 → 최소 1일 상품 선택'
+      : `실제 유료 사용일 ${paidDays}일에 맞는 최적 상품`;
+
+    // Detail text
+    const detail = document.getElementById('resultDetail');
+    detail.innerHTML = `
+      <b>${fmtDate(arrivalDate)}</b> 도착 → <b>무료</b><br>
+      <b>${fmtDate(firstPaidDate)}</b>부터 유료 시작<br>
+      마지막 사용일: <b>${fmtDate(lastUsedDate)}</b><br>
+      유료 일수: <b>${paidDays}일</b>
+    `;
+
+    // Breakdown table
+    const bd = document.getElementById('breakdown');
+    let rows = '';
+    rows += `<div class="row"><span>🛬 도착일 <b>${fmtDate(arrivalDate)}</b></span><span class="free-tag">무료</span></div>`;
+    if (paidDays > 0) {
+      rows += `<div class="row"><span>📶 유료 사용 기간 <b>${fmtDate(firstPaidDate)} ~ ${fmtDate(lastUsedDate)}</b></span><span class="paid-tag">${paidDays}일</span></div>`;
+    }
+    rows += `<div class="row"><span>✈️ 출국일 <b>${fmtDate(departureDate)}</b></span><span>${departure.getHours() === 0 && departure.getMinutes() === 0 ? '자정 출발 → 전날까지 사용' : '출국 당일도 사용'}</span></div>`;
+    rows += `<div class="row"><span>🛒 <b>구매 상품</b></span><span><b style="color:var(--red)">${recommended}일</b></span></div>`;
+    bd.innerHTML = rows;
+
+    // eSIM tip
+    const tip = document.getElementById('esimTip');
+    const arrivalHour = arrival.getHours();
+    const arrivalMin = arrival.getMinutes();
+    const totalArrivalMins = arrivalHour * 60 + arrivalMin;
+    const minsUntilMidnight = 24 * 60 - totalArrivalMins;
+
+    if (minsUntilMidnight <= 60) {
+      tip.innerHTML = `<b>⚠️ 주의:</b> 베트남 도착 시각이 자정 ${minsUntilMidnight}분 전입니다. eSIM을 켜면 무료 시간이 짧을 수 있어요.<br>자정 이후에 eSIM을 켜시면 도착 당일 무료 혜택을 온전히 누릴 수 있습니다.`;
+    } else {
+      tip.innerHTML = `<b>💡 eSIM 사용 팁:</b> 베트남 도착 후 공항에서 eSIM을 켜세요. 도착 당일(${fmtDate(arrivalDate)}) 자정 23:59:59까지 무료로 사용하실 수 있습니다.`;
+    }
+
+    resultEl.classList.add('visible');
+  }
+
+  function toDateOnly(d) {
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  }
+  function addDays(d, n) {
+    const r = new Date(d);
+    r.setDate(r.getDate() + n);
+    return r;
+  }
+  function dayDiff(a, b) {
+    return Math.round((b - a) / (1000 * 60 * 60 * 24));
+  }
+  function fmtDate(d) {
+    return `${d.getMonth() + 1}/${d.getDate()}(${['일','월','화','수','목','금','토'][d.getDay()]})`;
+  }
+</script>
+</body>
+</html>
